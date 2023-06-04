@@ -2,11 +2,7 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const app = express();
-const {
-  MongoClient,
-  ServerApiVersion,
-  ListCollectionsCursor,
-} = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.PORT || 5000;
 
 // middleware
@@ -40,6 +36,17 @@ async function run() {
     app.post("/task", async (req, res) => {
       const data = req.body;
       const result = await taskCollection.insertOne(data);
+      res.send(result);
+    });
+
+    // update task description api
+    app.put("/task/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: { status: "complete" },
+      };
+      const result = await taskCollection.updateOne(filter, updateDoc);
       res.send(result);
     });
 
