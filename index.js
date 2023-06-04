@@ -27,8 +27,22 @@ async function run() {
     const taskCollection = client.db("taskTaker").collection("tasks");
 
     // get all tasks api
+
+    app.get("/tasks/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await taskCollection.findOne(query);
+      res.send(result);
+    });
+
     app.get("/tasks", async (req, res) => {
-      const result = await taskCollection.find().toArray();
+      const email = req.query.email;
+
+      if (!email) {
+        res.send([]);
+      }
+      const query = { email: email };
+      const result = await taskCollection.find(query).toArray();
       res.send(result);
     });
 
@@ -40,11 +54,25 @@ async function run() {
     });
 
     // update task description api
-    app.put("/task/:id", async (req, res) => {
+    app.patch("/task/:id", async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
       const updateDoc = {
         $set: { status: "complete" },
+      };
+      const result = await taskCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    });
+
+    app.put("/update/:id", async (req, res) => {
+      const id = req.params.id;
+      const body = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          task: body.task,
+          description: body.description,
+        },
       };
       const result = await taskCollection.updateOne(filter, updateDoc);
       res.send(result);
