@@ -2,7 +2,11 @@ const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
 const app = express();
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const {
+  MongoClient,
+  ServerApiVersion,
+  ListCollectionsCursor,
+} = require("mongodb");
 const port = process.env.PORT || 5000;
 
 // middleware
@@ -25,6 +29,12 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
     const taskCollection = client.db("taskTaker").collection("tasks");
+
+    // get all tasks api
+    app.get("/tasks", async (req, res) => {
+      const result = await taskCollection.find().toArray();
+      res.send(result);
+    });
 
     // post single task api
     app.post("/task", async (req, res) => {
